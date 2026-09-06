@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <!-- windows10.0.19041.0 gives us WinRT projections for Windows.Media.SpeechSynthesis,
+         which is how OneCore voices are consumed from a Win32/WinForms app. -->
+    <TargetFramework>net8.0-windows10.0.19041.0</TargetFramework>
+    <TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
+    <UseWindowsForms>true</UseWindowsForms>
+    <UseWinRT>true</UseWinRT>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <ApplicationHighDpiMode>PerMonitorV2</ApplicationHighDpiMode>
+    <AssemblyName>SpeechMidiKeyboard</AssemblyName>
+    <RootNamespace>SpeechMidiKeyboard</RootNamespace>
+    <Authors>lgtmbb</Authors>
+    <Product>Speech Synthesizer MIDI Keyboard</Product>
+    <!-- Portable: no installer, self-contained single exe published with:
+         dotnet publish -c Release -r win-x64 --self-contained true
+           -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -->
+    <InvariantGlobalization>false</InvariantGlobalization>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- SAPI5 access from .NET (System.Speech is Windows-only, ships as a NuGet package). -->
+    <PackageReference Include="System.Speech" Version="8.0.0" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,6 @@
+bin/
+obj/
+*.user
+.vs/
+settings.json
+pitch_default.json
