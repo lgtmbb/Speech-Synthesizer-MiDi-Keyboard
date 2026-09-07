@@ -1,6 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
+    <!-- Without this the SDK defaults OutputType to Library, which also silently
+         disables the WinForms ApplicationConfiguration.Initialize() source generator
+         used in Program.cs. Must be an executable for a desktop app. -->
+    <OutputType>WinExe</OutputType>
     <!-- windows10.0.19041.0 gives us WinRT projections for Windows.Media.SpeechSynthesis,
          which is how OneCore voices are consumed from a Win32/WinForms app. -->
     <TargetFramework>net8.0-windows10.0.19041.0</TargetFramework>
