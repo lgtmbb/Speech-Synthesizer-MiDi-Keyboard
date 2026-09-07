@@ -14,6 +14,7 @@ megadott hangmagasságon szólalnak meg, NVDA-kompatibilis, telepítés nélkül
   hangokat (pl. japán szótagokat) rendelni billentyűkhöz, és azokat kimondani.
 - **UTAU** énekhang-szintetizátor.
 - [infoalap.hu — Hallhassam / DEX](https://infoalap.hu/megoldasok/hallhassam/dex/) megoldás.
+- [QWS (André Louis)](http://www.andrelouis.com/qws/)
 
 ## Funkciók
 
