@@ -62,11 +62,13 @@ normál (nem "éneklő") beszéd utána a megszokott hangon folytatódik.
   telepítő API-t harmadik féltől; a program a hiányzó hangok észlelésekor
   megnyitja a Windows Beállítások megfelelő lapját (`ms-settings:speech`),
   ahonnan pár kattintással telepíthetők.
-- A hangmagasság-eltolás (pitch bend) minden lenyomott hangnál egy-egy új
-  megszólalást indít a kívánt hangmagassággal (SSML alapon) — ez ugyanaz a
-  modell, mint amit a VocalWriter és a böngészős szótag-billentyűzetek is
-  használnak; nem egy folyamatosan tartott hang élő hangmagasság-görbéje, mert
-  egyik motor sem biztosít ilyen API-t.
+- A hangmagasság-eltolás (pitch bend) egy gyors időzítővel valósul meg: Shift
+  nyomva tartása alatt a program kb. 35 ezredmásodpercenként egy apró lépéssel
+  (kb. fél félhanggal) tovább tolja az aktuális hangmagasságot, és minden
+  lépésnél újra megszólaltatja a hangot — ez ugyanaz az elv, mint amikor egy
+  beállítások-ablak fel/le nyílára gyorsan rákattintasz, csak itt automatikusan,
+  nagyon gyorsan ismétlődik. Elég sűrűn egymás után ismételve ez a fülnek
+  folyamatos csúszásnak (glide-nak) hallatszik, nem különálló hangoknak.
 
 ## Kész, letölthető build (nincs szükség saját fordításra)
 

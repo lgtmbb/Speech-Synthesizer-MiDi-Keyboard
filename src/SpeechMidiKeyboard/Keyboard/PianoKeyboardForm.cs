@@ -15,17 +15,34 @@ namespace SpeechMidiKeyboard.Keyboard;
 ///   - F2-F12 select the active pitch-bend point (deeper/shallower bend).
 ///   - Escape closes the overlay and restores the engine to the values saved
 ///     in pitch_default.json (spec item 8's last clause).
+///
+/// PITCH BEND IMPLEMENTATION NOTE:
+/// None of the three engines (SAPI5/SAPI4/OneCore) can glide the pitch of an
+/// utterance that's already playing - each Speak() call is a discrete, separate
+/// utterance. To *simulate* a continuous bend, we do what the person who filed
+/// this spec described: while Shift is held and a note is sounding, a fast
+/// Timer repeatedly re-triggers Speak() with the pitch nudged a small step
+/// further up/down each tick (like tapping a spinner's up-arrow very quickly).
+/// Fast enough steps, close enough together, read to the ear as a slide rather
+/// than as discrete notes - the same trick synth arpeggiators use to fake a
+/// portamento out of a monophonic step sequencer.
 /// </summary>
 public sealed class PianoKeyboardForm : Form
 {
     private readonly IVoiceEngine _engine;
     private readonly AppSettings _settings;
     private readonly Label _statusLabel;
+    private readonly System.Windows.Forms.Timer _bendTimer;
+
+    private const double BendStepSemitones = 0.35; // size of each "tap" in the fast step sequence
+    private const int BendTickIntervalMs = 35;      // how often we re-trigger while bending - fast enough to read as a glide
 
     private int _octave;
     private int _activeBendPointIndex = 0; // defaults to F2 = smallest bend
     private bool _bendingUp;
     private bool _bendingDown;
+    private double _currentBendSemitones; // where the fast step-sequence currently is, toward the active point's target
+    private int? _heldNoteSemitone;       // the note currently being sustained (key held down), if any
 
     public PianoKeyboardForm(IVoiceEngine engine, AppSettings settings)
     {
@@ -54,23 +71,23 @@ public sealed class PianoKeyboardForm : Form
         };
         Controls.Add(_statusLabel);
 
+        _bendTimer = new System.Windows.Forms.Timer { Interval = BendTickIntervalMs };
+        _bendTimer.Tick += OnBendTimerTick;
+
         KeyDown += OnKeyDown;
         KeyUp += OnKeyUp;
-        FormClosed += (_, _) => RestoreDefaultsFromSnapshot();
+        FormClosed += (_, _) =>
+        {
+            _bendTimer.Stop();
+            _bendTimer.Dispose();
+            RestoreDefaultsFromSnapshot();
+        };
     }
 
     private string BuildStatusText() =>
         $"Oktáv: {_octave}    Bend pont: F{_activeBendPointIndex + 2} " +
         $"(±{NoteKeyMap.SemitonesForPoint(_activeBendPointIndex):0.#} félhang)    " +
         $"Puffer: \"{_settings.CurrentBuffer}\"";
-
-    private double CurrentPitchOffset()
-    {
-        var magnitude = NoteKeyMap.SemitonesForPoint(_activeBendPointIndex);
-        if (_bendingUp) return magnitude;
-        if (_bendingDown) return -magnitude;
-        return 0;
-    }
 
     private void OnKeyDown(object? sender, KeyEventArgs e)
     {
@@ -88,6 +105,7 @@ public sealed class PianoKeyboardForm : Form
             bool isLeft = (User32.GetKeyState((int)Keys.LShiftKey) & 0x8000) != 0;
             if (isRight) _bendingUp = true;
             if (isLeft) _bendingDown = true;
+            _bendTimer.Start();
             _statusLabel.Text = BuildStatusText();
             e.Handled = true;
             return;
@@ -111,6 +129,7 @@ public sealed class PianoKeyboardForm : Form
 
         if (NoteKeyMap.TryGetSemitoneOffset(e.KeyCode, out var semitone) && !e.Alt && !e.Control)
         {
+            _heldNoteSemitone = semitone;
             PlayNote(semitone);
             e.Handled = true;
         }
@@ -124,7 +143,47 @@ public sealed class PianoKeyboardForm : Form
             bool leftStillDown = (User32.GetKeyState((int)Keys.LShiftKey) & 0x8000) != 0;
             _bendingUp = rightStillDown;
             _bendingDown = leftStillDown;
+
+            if (!_bendingUp && !_bendingDown)
+            {
+                _bendTimer.Stop();
+                _currentBendSemitones = 0; // snap back to unbent pitch once both Shifts are released
+            }
             _statusLabel.Text = BuildStatusText();
+            return;
+        }
+
+        if (NoteKeyMap.TryGetSemitoneOffset(e.KeyCode, out var semitone) && _heldNoteSemitone == semitone)
+        {
+            _heldNoteSemitone = null;
+        }
+    }
+
+    /// <summary>
+    /// Fires every BendTickIntervalMs while at least one Shift is held. Each tick
+    /// nudges the live bend amount one small step closer to the active point's
+    /// target magnitude and, if a note is currently sustained, re-speaks it at
+    /// the new pitch - the "very fast up/down stepping" the spec asked for.
+    /// </summary>
+    private void OnBendTimerTick(object? sender, EventArgs e)
+    {
+        var targetMagnitude = NoteKeyMap.SemitonesForPoint(_activeBendPointIndex);
+        var target = _bendingUp ? targetMagnitude : _bendingDown ? -targetMagnitude : 0;
+
+        if (_currentBendSemitones < target)
+        {
+            _currentBendSemitones = Math.Min(target, _currentBendSemitones + BendStepSemitones);
+        }
+        else if (_currentBendSemitones > target)
+        {
+            _currentBendSemitones = Math.Max(target, _currentBendSemitones - BendStepSemitones);
+        }
+
+        _statusLabel.Text = BuildStatusText();
+
+        if (_heldNoteSemitone.HasValue)
+        {
+            PlayNote(_heldNoteSemitone.Value);
         }
     }
 
@@ -133,8 +192,8 @@ public sealed class PianoKeyboardForm : Form
         var text = string.IsNullOrEmpty(_settings.CurrentBuffer) ? "la" : _settings.CurrentBuffer;
 
         // Middle reference octave is 4; each octave away is +/-12 semitones,
-        // plus whatever the current pitch-bend (Shift) is contributing.
-        double totalSemitones = (_octave - 4) * 12 + semitoneOffsetFromC + CurrentPitchOffset();
+        // plus whatever the fast step-sequenced pitch bend is currently at.
+        double totalSemitones = (_octave - 4) * 12 + semitoneOffsetFromC + _currentBendSemitones;
 
         _engine.Speak(text, _settings.VoiceName, _settings.Rate, _settings.Volume, totalSemitones);
     }
@@ -157,3 +216,4 @@ internal static class User32
     [System.Runtime.InteropServices.DllImport("user32.dll")]
     internal static extern short GetKeyState(int nVirtKey);
 }
+
