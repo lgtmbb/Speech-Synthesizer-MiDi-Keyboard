@@ -20,7 +20,7 @@
     <Authors>lgtmbb</Authors>
     <Product>Speech Synthesizer MIDI Keyboard</Product>
     <!-- Portable: no installer, self-contained single exe published with:
-         dotnet publish -c Release -r win-x64 --self-contained true
+         dotnet publish -c Release -r win-x64 -p:SelfContained=true
            -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -->
     <InvariantGlobalization>false</InvariantGlobalization>
   </PropertyGroup>
