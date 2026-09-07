@@ -67,7 +67,26 @@ normál (nem "éneklő") beszéd utána a megszokott hangon folytatódik.
   használnak; nem egy folyamatosan tartott hang élő hangmagasság-görbéje, mert
   egyik motor sem biztosít ilyen API-t.
 
-## Build / futtatás (Windows szükséges)
+## Kész, letölthető build (nincs szükség saját fordításra)
+
+A repóban van egy GitHub Actions automatizmus (`.github/workflows/build.yml`),
+amely minden `main` ágra történő feltöltéskor **egy valódi GitHub-os Windows
+gépen** lefordítja a programot, és elkészíti a portable csomagot — neked
+emiatt nem kell sem Visual Studiot, sem a .NET SDK-t telepítened, sem
+semmit fordítanod.
+
+A kész build letöltése:
+1. Nyisd meg a repó **Actions** fülét: `https://github.com/lgtmbb/Speech-Synthesizer-MiDi-Keyboard/actions`
+2. Kattints a legutóbbi (legfelső) "Build portable Windows app" futásra.
+3. Az oldal alján, az **Artifacts** részben találod a
+   `SpeechMidiKeyboard-windows-portable` nevű letöltést — ez egy zip, benne a
+   futtatható `.exe`-vel és minden szükséges fájllal.
+4. Töltsd le, csomagold ki, és futtasd az `.exe`-t — telepítés nem kell.
+
+Ha valamiért nincs friss futás, a jobb felső "Run workflow" gombbal (workflow_dispatch)
+manuálisan is elindítható az Actions fülön.
+
+## Build / futtatás saját gépen (opcionális, Windows szükséges hozzá)
 
 Ez a projekt WinForms + WinRT (OneCore) interopot használ, ezért **csak
 Windows alatt fordítható és futtatható** (Visual Studio 2022+ vagy a .NET 8
