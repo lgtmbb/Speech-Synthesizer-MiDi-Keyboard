@@ -21,12 +21,14 @@ jobs:
       - name: Restore
         run: dotnet restore SpeechMidiKeyboard.sln
 
-      - name: Publish portable, self-contained, single-file build
+      - name: Publish portable, self-contained build (folder, not single-file)
+        # PublishSingleFile intentionally NOT used: its self-extracting launcher stub
+        # is what triggered a heuristic-only antivirus false positive (Zillya) on
+        # VirusTotal. A plain folder publish has no extraction step and avoids that
+        # behavioral pattern entirely; it's still fully portable (just copy the folder).
         run: >
           dotnet publish src/SpeechMidiKeyboard/SpeechMidiKeyboard.csproj
           -c Release -r win-x64 --self-contained true
-          -p:PublishSingleFile=true
-          -p:IncludeNativeLibrariesForSelfExtract=true
           -o publish
 
       - name: Upload build as a downloadable artifact
