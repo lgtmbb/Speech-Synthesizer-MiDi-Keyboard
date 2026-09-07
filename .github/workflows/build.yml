@@ -5,6 +5,10 @@ on:
     branches: [ main ]
   workflow_dispatch: {}
 
+# Needed so the workflow's own GITHUB_TOKEN is allowed to create/update a Release.
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: windows-latest
@@ -31,8 +35,25 @@ jobs:
           -c Release -r win-x64 --self-contained true
           -o publish
 
-      - name: Upload build as a downloadable artifact
+      - name: Zip the published app
+        run: Compress-Archive -Path publish\* -DestinationPath SpeechMidiKeyboard-windows-portable.zip
+
+      - name: Upload build as a workflow artifact (requires GitHub login)
         uses: actions/upload-artifact@v4
         with:
           name: SpeechMidiKeyboard-windows-portable
           path: publish/
+
+      - name: Publish/update a public "latest" GitHub Release with the zip attached
+        # This gives a plain, no-login-required direct download link, unlike
+        # workflow artifacts (which require a GitHub session to fetch).
+        uses: ncipollo/release-action@v1
+        with:
+          tag: latest
+          name: "Legfrissebb automatikus build"
+          body: "Automatikusan összeállítva a(z) ${{ github.sha }} commitból."
+          artifacts: SpeechMidiKeyboard-windows-portable.zip
+          allowUpdates: true
+          replacesArtifacts: true
+          makeLatest: true
+          token: ${{ secrets.GITHUB_TOKEN }}
