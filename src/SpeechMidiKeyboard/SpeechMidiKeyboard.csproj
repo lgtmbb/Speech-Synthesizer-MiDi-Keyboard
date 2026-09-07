@@ -5,6 +5,11 @@
          which is how OneCore voices are consumed from a Win32/WinForms app. -->
     <TargetFramework>net8.0-windows10.0.19041.0</TargetFramework>
     <TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
+    <!-- Declared here (not just passed to `dotnet publish -r win-x64`) so that a plain
+         `dotnet restore`/`dotnet restore SpeechMidiKeyboard.sln` step - the kind CI runs
+         before publish - already knows to fetch the win-x64 runtime pack. Without this,
+         restore and publish can disagree about the RID and fail with NETSDK1112. -->
+    <RuntimeIdentifiers>win-x64</RuntimeIdentifiers>
     <UseWindowsForms>true</UseWindowsForms>
     <UseWinRT>true</UseWinRT>
     <Nullable>enable</Nullable>
