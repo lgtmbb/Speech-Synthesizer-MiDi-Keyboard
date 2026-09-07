@@ -8,13 +8,25 @@ megadott hangmagasságon szólalnak meg, NVDA-kompatibilis, telepítés nélkül
 
 ## Ihletforrások
 
-- **Gakuen Pocket Miku** — hordozható, billentyűzettel vezérelt énekszintetizátor-játék.
+- **Gakuen Pocket Miku** (Gakken NSX-39) — egy 16 gombos, stylusszal (íróhegy) vezérelt
+  hordozható énekszintetizátor, amely Hatsune Miku hangját szólaltatja meg. A gombok
+  fölött végighúzott stylus **folyamatosan csúsztatja a hangmagasságot** (szalag/ribbon
+  vezérlés, theremin-szerűen), külön gombok állítják az oktávot, és 5 magánhangzó
+  (A-E-I-O-U) közül lehet választani, amit a kiválasztott hangmagasságon énekel. Pontosan
+  ez a "gombbal hang + oktáv + folyamatos csúszás" elv ihlette a program pitch bend
+  mechanizmusát.
 - [VocalWriter](https://github.com/masonasons/vocalwriter/) — szöveg alapú, billentyűzettel vezérelt hangszintetizátor eszköz.
 - A JavaScript azon képessége, hogy böngészőben billentyűlenyomásra tud
   hangokat (pl. japán szótagokat) rendelni billentyűkhöz, és azokat kimondani.
 - **UTAU** énekhang-szintetizátor.
 - [infoalap.hu — Hallhassam / DEX](https://infoalap.hu/megoldasok/hallhassam/dex/) megoldás.
-- [QWS (André Louis)](http://www.andrelouis.com/qws/)
+- [QWS (André Louis)](http://www.andrelouis.com/qws/) — a "Quick Windows Sequencer", egy
+  MIDI szekvenszer, amelyet **James Bowden, egy látássérült programozó** írt saját
+  magának, miután a kereskedelmi Windows-os szekvenszerek egérfüggősége miatt
+  használhatatlannak találta őket képernyőolvasóval. A QWS kizárólag natív Windows
+  vezérlőket használ, teljes egészében billentyűzetről kezelhető, és jól működik
+  képernyőolvasókkal — ugyanaz a tervezési elv, amit ez a program is követ
+  (natív WinForms vezérlők, Alt-menü, NVDA-kompatibilitás).
 
 ## Funkciók
 
